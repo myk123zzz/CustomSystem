@@ -1,0 +1,19 @@
+# 环境 & 密钥
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 数据 & 运行时
+pgdata/
+workspace/sessions/
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+
+# ChromaDB（如果用的话）
+chroma_data/
