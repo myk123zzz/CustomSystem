@@ -1,0 +1,37 @@
+[
+  {"id":"greeting_hello","category":"fast_path","description":"基础问候零 LLM","turns":["你好"],"expected_target":"fast_path","expected_intent":"greeting","forbidden_tools":["order_query","request_human"],"max_tool_calls":0,"max_llm_calls":0,"reply_keywords":["小闪"],"expected_handoff":false,"expected_phase":"normal"},
+  {"id":"greeting_thanks","category":"fast_path","description":"结束语走确定性回复","turns":["谢谢"],"expected_target":"fast_path","expected_intent":"greeting","max_tool_calls":0,"max_llm_calls":0,"expected_handoff":false,"expected_phase":"normal"},
+  {"id":"faq_return_policy","category":"fast_path","turns":["退货政策是什么？"],"expected_target":"fast_path","expected_intent":"faq","required_tools":["faq_lookup"],"min_tool_calls":1,"max_tool_calls":1,"max_llm_calls":0,"reply_keywords":["退货"],"expected_handoff":false},
+  {"id":"faq_invoice","category":"fast_path","turns":["能开发票吗？"],"expected_target":"fast_path","expected_intent":"faq","required_tools":["faq_lookup"],"max_tool_calls":1,"max_llm_calls":0},
+  {"id":"faq_warranty","category":"fast_path","turns":["耳机保修多久？"],"expected_target":"fast_path","expected_intent":"faq","required_tools":["faq_lookup"],"max_tool_calls":1,"max_llm_calls":0},
+  {"id":"faq_change_address","category":"fast_path","turns":["订单可以改地址吗？"],"expected_target":"fast_path","expected_intent":"faq","required_tools":["faq_lookup"],"max_llm_calls":0},
+
+  {"id":"product_simple_price","category":"presales","turns":["Qi2磁吸充电宝多少钱"],"expected_target":"fast_path","expected_intent":"product","max_tool_calls":0,"max_llm_calls":0,"reply_keywords":["Qi2"],"absent_slots":["order_id","action"]},
+  {"id":"product_recommend_travel","category":"presales","turns":["推荐一个适合出差的充电器"],"expected_target":"presales","expected_intent":"product","forbidden_tools":["order_query"],"max_llm_calls":4},
+  {"id":"product_compare","category":"presales","turns":["两个磁吸充电宝哪个好，帮我对比"],"expected_target":"presales","expected_intent":"product","forbidden_tools":["order_query","request_human"],"max_llm_calls":4},
+  {"id":"product_budget","category":"presales","turns":["预算300，同时给笔记本和手机充电，怎么选？"],"expected_target":"presales","expected_intent":"complex","accepted_intents":["product"],"forbidden_tools":["order_query"],"max_llm_calls":5},
+
+  {"id":"order_bare_id","category":"in_sales","turns":["88001"],"expected_target":"fast_path","expected_intent":"order_query","required_tools":["order_query"],"max_tool_calls":1,"max_llm_calls":0,"expected_slots":{"order_id":"88001"}},
+  {"id":"order_query_complete","category":"in_sales","turns":["查询订单88902"],"expected_target":"fast_path","expected_intent":"order_query","required_tools":["order_query"],"max_llm_calls":0,"expected_slots":{"order_id":"88902"}},
+  {"id":"order_missing_id","category":"in_sales","turns":["帮我查一下订单"],"expected_target":"in_sales","expected_intent":"order_query","forbidden_tools":["order_query","rag_search"],"max_tool_calls":0,"max_llm_calls":4},
+  {"id":"logistics_complete","category":"in_sales","turns":["订单88902到哪了"],"expected_target":"fast_path","expected_intent":"logistics","required_tools":["order_query"],"max_llm_calls":0,"expected_slots":{"order_id":"88902"}},
+  {"id":"logistics_missing_id","category":"in_sales","turns":["我的快递什么时候到？"],"expected_target":"in_sales","expected_intent":"logistics","forbidden_tools":["order_query","rag_search"],"max_tool_calls":0,"max_llm_calls":4},
+  {"id":"order_unknown","category":"in_sales","turns":["查询订单99999"],"expected_target":"fast_path","expected_intent":"order_query","required_tools":["order_query"],"max_llm_calls":0,"expected_slots":{"order_id":"99999"}},
+
+  {"id":"aftersales_refund_complete","category":"aftersales","turns":["订单88001要申请退款"],"expected_target":"aftersales","expected_intent":"after_sales","required_tools":["order_query"],"forbidden_tools":["rag_search"],"max_llm_calls":4,"expected_phase":"normal","expected_slots":{"order_id":"88001","action":"退款"}},
+  {"id":"aftersales_refund_missing","category":"aftersales","turns":["我要退款"],"expected_target":"aftersales","expected_intent":"after_sales","forbidden_tools":["order_query"],"max_tool_calls":0,"max_llm_calls":4,"expected_phase":"collecting","expected_slots":{"action":"退款"}},
+  {"id":"aftersales_exchange","category":"aftersales","turns":["订单88003我想换货"],"expected_target":"aftersales","expected_intent":"after_sales","required_tools":["order_query"],"max_llm_calls":4,"expected_slots":{"order_id":"88003","action":"换货"}},
+  {"id":"aftersales_quality","category":"aftersales","turns":["商品坏了，我想售后"],"expected_target":"aftersales","expected_intent":"after_sales","forbidden_tools":["order_query"],"max_tool_calls":0,"max_llm_calls":4,"expected_phase":"collecting"},
+  {"id":"aftersales_multiturn_order","category":"memory","turns":["我的商品坏了，想售后","订单号是88001"],"expected_target":"aftersales","expected_intent":"after_sales","required_tools":["order_query"],"max_llm_calls":4,"expected_phase":"normal","expected_slots":{"order_id":"88001"}},
+  {"id":"aftersales_multiturn_reason","category":"memory","turns":["我要退款","订单号是88012","充不上电"],"expected_target":"aftersales","expected_intent":"after_sales","required_tools":["order_query"],"max_llm_calls":8,"expected_slots":{"order_id":"88012","action":"退款"}},
+  {"id":"cross_domain_slot_cleanup","category":"memory","turns":["订单88001要退款","推荐一个充电宝"],"expected_target":"presales","expected_intent":"product","required_tools":["order_query","rag_search"],"forbidden_tools":["request_human"],"max_llm_calls":4,"expected_phase":"normal","absent_slots":["order_id","action"]},
+
+  {"id":"human_explicit","category":"handoff","turns":["转人工客服"],"expected_target":"human","expected_intent":"complaint","required_tools":["request_human"],"max_tool_calls":1,"max_llm_calls":0,"expected_handoff":true,"expected_phase":"handoff"},
+  {"id":"human_manager","category":"handoff","turns":["我要找负责人"],"expected_target":"human","expected_intent":"complaint","required_tools":["request_human"],"max_llm_calls":0,"expected_handoff":true},
+  {"id":"human_complaint","category":"handoff","turns":["我要投诉你们"],"expected_target":"human","expected_intent":"complaint","required_tools":["request_human"],"max_llm_calls":0,"expected_handoff":true},
+  {"id":"human_regulator","category":"handoff","turns":["我要向监管部门举报"],"expected_target":"human","expected_intent":"complaint","required_tools":["request_human"],"max_llm_calls":0,"expected_handoff":true},
+
+  {"id":"complex_compatibility","category":"fallback","turns":["这个能不能给我的老款设备用？"],"expected_target":"presales","expected_intent":"complex","accepted_intents":["product"],"forbidden_tools":["order_query"],"max_llm_calls":5,"expected_handoff":false},
+  {"id":"complex_multi_intent","category":"fallback","turns":["我想买充电宝，顺便问下会员优惠"],"expected_target":"presales","expected_intent":"complex","accepted_intents":["product"],"forbidden_tools":["order_query"],"max_llm_calls":5},
+  {"id":"session_order_to_product","category":"memory","turns":["查询订单88902","Qi2磁吸充电宝多少钱"],"expected_target":"fast_path","expected_intent":"product","max_llm_calls":0,"expected_phase":"normal","absent_slots":["order_id","action"]}
+]

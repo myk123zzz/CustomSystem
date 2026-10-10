@@ -1,0 +1,27 @@
+[
+  {"id":"product_travel_bundle","collection":"product","query":"经常出差，只带一个充电器给笔记本和手机充电","expected":["DEMO-P01"]},
+  {"id":"product_thin_magnetic","collection":"product","query":"想要最轻薄的磁吸充电宝，通勤用","expected":["DEMO-P02"]},
+  {"id":"product_gaming_dock","collection":"product","query":"游戏本桌面扩展，需要 HDMI 和千兆网口","expected":["DEMO-P03"]},
+  {"id":"product_outdoor","collection":"product","query":"露营徒步需要防水大容量应急电源","expected":["DEMO-P04"]},
+  {"id":"product_qi2_trio","collection":"product","query":"旅行时苹果手机手表耳机一起无线充","expected":["DEMO-P05"]},
+  {"id":"product_dual_mini","collection":"product","query":"手机和平板同时充的小巧双口充电头","expected":["DEMO-P06"]},
+  {"id":"product_usb4","collection":"product","query":"能传 8K 视频和 40Gbps 的 240W 线","expected":["DEMO-P07"]},
+  {"id":"product_display_charger","collection":"product","query":"想实时查看每个口的充电瓦数和温度","expected":["DEMO-P08"]},
+  {"id":"product_child_powerstrip","collection":"product","query":"儿童书桌用的防触电安全插排","expected":["DEMO-P09"]},
+  {"id":"product_car_laptop","collection":"product","query":"在汽车上同时给笔记本和手机快充","expected":["DEMO-P10"]},
+  {"id":"product_swimming_headset","collection":"product","query":"游泳时可以戴还能自己存歌的耳机","expected":["DEMO-P11"]},
+  {"id":"product_basic_gan","collection":"product","query":"折叠插脚的 65W 氮化镓充电头","expected":["P001"]},
+
+  {"id":"faq_refund_arrival","collection":"faq","query":"退的钱几天才能回到支付宝","expected":["退款多久到账？"]},
+  {"id":"faq_signed_missing","collection":"faq","query":"快递说已经签收，可是我根本没拿到","expected":["订单显示签收但本人没收到怎么办？"]},
+  {"id":"faq_powerbank_storage","collection":"faq","query":"充电宝放半年不用应该留多少电","expected":["充电宝长期不用怎么保存？"]},
+  {"id":"faq_usb4_difference","collection":"faq","query":"为什么有的充电线能接显示器，有的只能慢速传文件","expected":["USB4 数据线和普通快充线有什么区别？","数据线可以传输文件吗？"]},
+  {"id":"faq_magnetic_heat","collection":"faq","query":"无线充的时候手机特别热正常吗","expected":["磁吸充电时手机发热正常吗？"]},
+  {"id":"faq_large_powerbank_flight","collection":"faq","query":"三万毫安的户外电池可以登机吗","expected":["户外充电宝能不能带上飞机？","充电宝可以带上飞机吗？"]},
+  {"id":"faq_split_invoice","collection":"faq","query":"一个订单里的两件商品能分别开票吗","expected":["同一订单可以拆分开发票吗？"]},
+  {"id":"faq_multiport_power","collection":"faq","query":"几个充电口一起插会怎么分瓦数","expected":["充电器多个端口的功率怎么分配？","多件设备一起充电会降功率吗？"]},
+  {"id":"faq_water_damage","collection":"faq","query":"标着防水但进液了还在质保范围吗","expected":["防水产品进水后还能保修吗？"]},
+  {"id":"faq_aftersales_material","collection":"faq","query":"东西坏了申请换新要拍哪些资料","expected":["售后核验需要提供什么？"]},
+  {"id":"faq_cod","collection":"faq","query":"收到商品的时候再付钱行不行","expected":["可以货到付款吗？"]},
+  {"id":"faq_address","collection":"faq","query":"下单以后发现收货地点填错了","expected":["可以改地址吗？"]}
+]

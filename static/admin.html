@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CustomSystem · 客服后台</title>
+<style>
+  :root {
+    --bg: #f8fafc; --surface: #fff; --text: #1e293b; --muted: #94a3b8;
+    --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6;
+    --border: #e2e8f0; --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+  h1 { font-size: 20px; margin-bottom: 20px; }
+  h1 span { font-size: 13px; color: var(--muted); font-weight: normal; margin-left: 8px; }
+
+  /* 统计卡片 */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .card { background: var(--surface); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+  .card .num { font-size: 28px; font-weight: 700; }
+  .card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .card.green .num { color: var(--green); }
+  .card.blue .num  { color: var(--blue); }
+  .card.red .num   { color: var(--red); }
+
+  /* 内容区 */
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .panels { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+  .panel h2 { font-size: 14px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+  /* 对话列表 */
+  .log-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .log-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .log-item .dot.green { background: var(--green); }
+  .log-item .dot.yellow { background: var(--yellow); }
+  .log-item .dot.blue { background: var(--blue); }
+  .log-item .dot.red { background: var(--red); }
+  .log-item .msg { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .log-item .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; color: var(--muted); white-space: nowrap; }
+
+  /* 统计条 */
+  .stat-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+  .stat-row .val { font-weight: 600; }
+
+  .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
+  .refresh { font-size: 11px; color: var(--muted); text-align: right; margin-bottom: 10px; }
+
+  /* 顶部标题栏 + 返回按钮 */
+  .topbar { display: flex; align-items: center; margin-bottom: 20px; }
+  .topbar h1 { margin-bottom: 0; }
+  .nav-btn {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    background: var(--blue); color: #fff;
+    border-radius: 8px; font-size: 13px; text-decoration: none;
+    transition: opacity .2s;
+  }
+  .nav-btn:hover { opacity: .85; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>CustomSystem 客服后台 <span>实时监控</span></h1>
+  <a class="nav-btn" href="/" title="返回聊天界面">💬 返回聊天</a>
+</div>
+
+<!-- 统计卡片 -->
+<div class="cards" id="cards">
+  <div class="card green"><div class="num" id="cardFAQ">-</div><div class="label">规则拦截（FAQ/订单）</div></div>
+  <div class="card blue"><div class="num" id="cardAgent">-</div><div class="label">Agent 处理</div></div>
+  <div class="card"><div class="num" id="cardTotal">-</div><div class="label">总对话数</div></div>
+  <div class="card red"><div class="num" id="cardHandoff">-</div><div class="label">需人工关注</div></div>
+</div>
+
+<!-- 双栏 -->
+<div class="panels">
+  <!-- 实时对话 -->
+  <div class="panel">
+    <h2>实时对话</h2>
+    <div class="refresh">每 3 秒刷新</div>
+    <div id="logList"><div class="empty">暂无对话记录</div></div>
+  </div>
+
+  <!-- 系统状态 -->
+  <div class="panel">
+    <h2>系统状态 & 会话</h2>
+    <div id="statusPanel"><div class="empty">加载中...</div></div>
+  </div>
+</div>
+
+<script>
+  // 数据接口需要 X-Admin-Token 鉴权。令牌只保存在当前标签页会话中。
+  let ADMIN_TOKEN = sessionStorage.getItem('adminToken') || '';
+  if (!ADMIN_TOKEN) {
+    ADMIN_TOKEN = window.prompt('请输入管理令牌') || '';
+    if (ADMIN_TOKEN) sessionStorage.setItem('adminToken', ADMIN_TOKEN);
+  }
+  const authHeaders = { 'X-Admin-Token': ADMIN_TOKEN };
+
+  async function refresh() {
+    try {
+      const [logR, statsR, sessR] = await Promise.all([
+        fetch('/api/admin/log', { headers: authHeaders }).then(r => r.json()),
+        fetch('/api/admin/stats', { headers: authHeaders }).then(r => r.json()),
+        fetch('/api/admin/sessions', { headers: authHeaders }).then(r => r.json()),
+      ]);
+
+      // ── 统计卡片（字段对齐 router.stats 实际返回）──
+      const total = statsR.total_requests || 0;
+      const agentCalls = statsR.agent_calls || 0;
+      document.getElementById('cardFAQ').textContent = total - agentCalls;  // 规则直达
+      document.getElementById('cardAgent').textContent = agentCalls;
+      document.getElementById('cardTotal').textContent = total;
+      document.getElementById('cardHandoff').textContent = statsR.handoffs || 0;
+
+      // ── 对话日志 ──
+      const logs = logR.log || [];
+      const list = document.getElementById('logList');
+      if (logs.length === 0) {
+        list.innerHTML = '<div class="empty">暂无对话记录</div>';
+      } else {
+        list.innerHTML = logs.slice().reverse().slice(0, 30).map(e => {
+          let dotCls = e.source === 'complex' ? 'blue' : 'green';
+          if (e.needs_human) dotCls = 'red';
+          return `<div class="log-item">
+            <div class="dot ${dotCls}"></div>
+            <div class="msg">${esc(e.message)}</div>
+            <div class="badge">${esc(e.source)}</div>
+            <div class="badge">${e.took_ms}ms</div>
+          </div>`;
+        }).join('');
+      }
+
+      // ── 系统状态 & 会话 ──
+      const sp = document.getElementById('statusPanel');
+      const sessions = sessR.sessions || [];
+      let html = '<div class="stat-row"><span>路由直达率</span><span class="val">' + (statsR.direct_pct ?? 0) + '%</span></div>';
+      html += '<div class="stat-row"><span>Agent 占比</span><span class="val">' + (statsR.agent_pct ?? 0) + '%</span></div>';
+      html += '<div class="stat-row"><span>平均延迟</span><span class="val">' + (statsR.avg_latency_ms ?? 0) + 'ms</span></div>';
+      html += '<div class="stat-row"><span>LLM 分类次数</span><span class="val">' + (statsR.llm_classify_used ?? 0) + '</span></div>';
+      html += '<div class="stat-row"><span>活跃会话</span><span class="val">' + (sessR.count || 0) + '</span></div>';
+      html += '<div style="margin-top:12px;font-size:12px;color:var(--muted);">';
+      if (sessions.length === 0) {
+        html += '<div style="padding:4px 0;">暂无活跃会话</div>';
+      } else {
+        sessions.forEach(s => {
+          const phase = s.phase || 'normal';
+          const color = phase === 'collecting_info' ? '#eab308' : phase === 'handoff' ? '#ef4444' : '#22c55e';
+          html += `<div style="padding:4px 0;">● <span style="color:${color}">${esc(phase)}</span> · ${esc(s.key||'')} · ${esc(s.intent||'')}</div>`;
+        });
+      }
+      html += '</div>';
+      sp.innerHTML = html;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function esc(s) { return (s||'').toString().replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  refresh();
+  setInterval(refresh, 3000);
+</script>
+</body>
+</html>
